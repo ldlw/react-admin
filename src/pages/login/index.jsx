@@ -1,5 +1,6 @@
 import React,{ Component } from 'react';
-import { Form, Icon, Input, Button } from 'antd';
+import { Form, Icon, Input, Button, message } from 'antd';
+import axios from 'axios';
 
 //引入图片资源
 import logo from './logo.png';
@@ -23,7 +24,19 @@ class  Login extends Component {
         //校验通过
         const { username, password } = values;
         //发送请求，请求登录
-        console.log(username, password);
+        axios.post('/login',{username, password})
+          .then((res) =>{
+            const { data } = res;
+            console.log(data);
+            if(data.status === 0) {
+              //返回登录页面
+              this.props.history.replace('/');
+            }else{
+              message.error(data.msg,2);
+              //重置密码为空
+              this.props.form.resetFields(['password']);
+            }
+          })
       }else{
         //校验失败
         console.log('登录表单校验失败:',error);
@@ -49,13 +62,12 @@ class  Login extends Component {
       //不传参代表校验通过，传参代表校验失败
       callback();
     }
-
   }
 
 
   render() {
     //getFieldDecorator也是一个高阶组件
-    const { getFieldDecorator, getFieldsError, getFieldError, isFieldTouched } = this.props.form;
+    const { getFieldDecorator } = this.props.form;
 
     return <div className="login">
       <header  className="login-header">
@@ -68,7 +80,7 @@ class  Login extends Component {
           <Item>
             {
               getFieldDecorator(
-                'username',
+                'username',/*下面的input通过username挂载*/
                 {
                   rules: [
                      /*{ required: true, message: '请输入用户名' },
