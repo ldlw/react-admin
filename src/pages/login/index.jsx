@@ -1,9 +1,9 @@
 import React,{ Component } from 'react';
-import { Form, Icon, Input, Button, message } from 'antd';
-import axios from 'axios';
+import { Form, Icon, Input, Button } from 'antd';
+import { reqLogin} from "../../api";
 
 //引入图片资源
-import logo from './logo.png';
+import logo from '../../assets/images/logo.png';
 import './index.less'
 
 //缓存一下
@@ -13,7 +13,7 @@ class  Login extends Component {
   login = (e) =>{
     e.preventDefault();
     //用来校验表单并获取表单的值
-    this.props.form.validateFields((error,values)=>{
+    this.props.form.validateFields(async (error,values)=>{
       // console.log(error,values);
       /*
         error 代表表单校验结果
@@ -24,19 +24,15 @@ class  Login extends Component {
         //校验通过
         const { username, password } = values;
         //发送请求，请求登录
-        axios.post('/login',{username, password})
-          .then((res) =>{
-            const { data } = res;
-            console.log(data);
-            if(data.status === 0) {
-              //返回登录页面
-              this.props.history.replace('/');
-            }else{
-              message.error(data.msg,2);
-              //重置密码为空
-              this.props.form.resetFields(['password']);
-            }
-          })
+        const result = await reqLogin(username, password);
+
+        if(result) {
+          //登录成功
+          this.props.history.replace('/');
+        }else {
+          //登录失败
+          this.props.form.resetFields(['password']);
+        }
       }else{
         //校验失败
         console.log('登录表单校验失败:',error);
